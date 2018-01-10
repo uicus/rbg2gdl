@@ -3,7 +3,7 @@ EXEC = rbg2gdl
 INC = -IrbgParser/src
 CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s $(INC)
 CXXFLAGSDEBUG = -Wall -Wextra -Wpedantic -std=c++11 -g $(INC)
-OBJECTS = src/translator.o src/gdl_constants.o
+OBJECTS = src/translator.o src/gdl_constants.o src/state.o src/edge.o src/automaton.o
 
 all: $(OBJECTS)
 	cd rbgParser && make lib
