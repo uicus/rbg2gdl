@@ -51,7 +51,8 @@ int main(int argc, const char** argv){
                 out<<pg.to_rbg(true);
             }
             else{
-                out<<to_gdl(pg);
+                translator t(std::move(pg));
+                out<<t.to_gdl();
             }
         }
         catch(rbg_parser::message& m){
