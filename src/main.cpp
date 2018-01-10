@@ -9,6 +9,7 @@
 #include"game_items.hpp"
 #include"macro_bank.hpp"
 #include"slice_iterator.hpp"
+#include"translator.hpp"
 
 int main(int argc, const char** argv){
     if(argc < 2){
@@ -50,7 +51,7 @@ int main(int argc, const char** argv){
                 out<<pg.to_rbg(true);
             }
             else{
-                // print GDL
+                out<<to_gdl(pg);
             }
         }
         catch(rbg_parser::message& m){

@@ -1,17 +1,17 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s
-CXXFLAGSDEBUG = -Wall -Wextra -Wpedantic -std=c++11 -g
 EXEC = rbg2gdl
 INC = -IrbgParser/src
-OBJECTS =
+CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s $(INC)
+CXXFLAGSDEBUG = -Wall -Wextra -Wpedantic -std=c++11 -g $(INC)
+OBJECTS = src/translator.o
 
 all: $(OBJECTS)
 	cd rbgParser && make lib
-	$(CXX) $(CXXFLAGS) $(INC) -o $(EXEC) src/main.cpp rbgParser/rbgParser.so $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(EXEC) src/main.cpp rbgParser/rbgParser.so $(OBJECTS)
 
 debug: $(OBJECTS)
 	cd rbgParser && make lib
-	$(CXX) $(CXXFLAGSDEBUG) $(INC) -o $(EXEC) src/main.cpp rbgParser/rbgParser.so $(OBJECTS)
+	$(CXX) $(CXXFLAGSDEBUG) -o $(EXEC) src/main.cpp rbgParser/rbgParser.so $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS)
