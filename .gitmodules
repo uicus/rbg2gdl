@@ -1,0 +1,3 @@
+[submodule "rbgParser"]
+	path = rbgParser
+	url = https://github.com/uicus/rbgParser.git
