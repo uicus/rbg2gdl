@@ -25,11 +25,15 @@ uint state::get_id(void)const{
     return id;
 }
 
-void state::inform_about_register_resize(uint shift_value){
+void state::inform_about_being_appended(uint shift_value){
     for(auto& el: next_states)
         el.shift(shift_value);
 }
 
 void state::connect_with_state(uint index_in_local_register, const rbg_parser::pure_game_move* label_condition){
     next_states.push_back(edge(index_in_local_register,label_condition));
+}
+
+bool state::modifier(void)const{
+    return action!=nullptr;
 }
