@@ -11,6 +11,7 @@ class edge{
     public:
         edge(uint local_register_endpoint_index, const rbg_parser::pure_game_move* label_condition);
         void shift(uint shift_value);
+        void inform_abut_state_deletion(uint deleted_index);
 };
 
 #endif

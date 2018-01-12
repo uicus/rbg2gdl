@@ -22,8 +22,10 @@ class state{
         ~state(void)=default;
         uint get_id(void)const;
         void inform_about_being_appended(uint shift_value);
+        void inform_about_state_deletion(uint deleted_index);
         void connect_with_state(uint index_in_local_register, const rbg_parser::pure_game_move* label_condition=nullptr);
         bool modifier(void)const;
+        void absorb(state&& rhs);
 };
 
 #endif

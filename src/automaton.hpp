@@ -13,14 +13,22 @@ class automaton{
         uint accept_state;
         std::pair<uint,uint> place_side_by_side(automaton&& rhs);
         std::pair<uint,uint> prepare_new_endpoints(void);
+        void set_endpoints(const std::pair<uint,uint>& new_endpoints);
+        void concat_automaton(automaton&& concatee);
+        void concat_automaton_by_epsilon(automaton&& concatee);
+        void concat_automaton_by_start_state(automaton&& concatee);
     public:
-        void add_automaton(automaton&& rhs);
         void starify_automaton(void);
+        void repeat_automaton(uint times);
         friend automaton pure_letter_automaton(const rbg_parser::pure_game_move* label);
         friend automaton modifier_automaton(const rbg_parser::game_move* action);
+        friend automaton sum_of_automatons(std::vector<automaton>&& elements);
+        friend automaton concatenation_of_automatons(std::vector<automaton>&& elements);
 };
 
 automaton pure_letter_automaton(const rbg_parser::pure_game_move* label);
 automaton modifier_automaton(const rbg_parser::game_move* action);
+automaton sum_of_automatons(std::vector<automaton>&& elements);
+automaton concatenation_of_automatons(std::vector<automaton>&& elements);
 
 #endif
