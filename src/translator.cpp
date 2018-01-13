@@ -22,12 +22,20 @@ void translator::board_to_gdl(void){
     for(uint i=0;i<pg.get_board().get_height();++i)
         for(uint j=0;j<pg.get_board().get_width();++j)
             result += "(init "+cell(j,i,pg.get_board().get_square(j,i).to_string())+")\n";
+    result += '\n';
 }
 
 void translator::init_to_gdl(void){
     result += section_title("Init");
     first_player_to_gdl();
     board_to_gdl();
+}
+
+void translator::arithmetics_to_gdl(void){
+    result += section_title("Arithmetics");
+    uint board_max = std::max(pg.get_board().get_height(),pg.get_board().get_width());
+    result += succ(board_succ,board_max);
+    result += arithmetics(board_succ,board_arithmetics);
 }
 
 void translator::build_automaton(void){
@@ -41,5 +49,6 @@ std::string translator::to_gdl(void){
     result += section_title(pg.get_name());
     roles_to_gdl();
     init_to_gdl();
+    arithmetics_to_gdl();
     return result;
 }

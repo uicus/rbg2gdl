@@ -14,6 +14,7 @@ class translator{
         void first_player_to_gdl(void);
         void board_to_gdl(void);
         void init_to_gdl(void);
+        void arithmetics_to_gdl(void);
         void build_automaton(void);
     public:
         translator(rbg_parser::parsed_game&& pg);

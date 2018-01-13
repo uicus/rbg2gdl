@@ -38,9 +38,50 @@ std::string succ(const std::string& name, uint max_number, bool logarithmic){
         }
     }
     else
-        for(uint i=1;i<=max_number;++i)
+        for(uint i=0;i<max_number-1;++i)
             result += "("+name+' '+std::to_string(i)+' '+std::to_string(i+1)+")\n";
+    return result+'\n';
+}
+
+std::string sum(const std::string& succ_name, const std::string& sum_name){
+    std::string result;
+    result += "(<= ("+sum_name+" ?x 0 ?x)\n    ("+succ_name+" ?x ?y))\n";
+    result += "(<= ("+sum_name+" ?x 0 ?x)\n    ("+succ_name+" ?y ?x))\n";
+    result += "(<= ("+sum_name+" ?x ?y ?z)\n";
+    result += "    ("+succ_name+" ?x ?succx)\n";
+    result += "    ("+succ_name+" ?prevy ?y)\n";
+    result += "    ("+sum_name+" ?succx ?prevy ?z))\n";
     return result;
+}
+
+std::string sub(const std::string& sum_name, const std::string& sub_name){
+    std::string result;
+    result += "(<= ("+sub_name+" ?x ?y ?z)\n";
+    result += "    ("+sum_name+" ?z ?y ?x))\n";
+    return result;
+}
+
+std::string eq(const std::string& sum_name, const std::string& eq_name){
+    std::string result;
+    result += "(<= ("+eq_name+" ?x ?z)\n";
+    result += "    ("+sum_name+" ?x 0 ?z))\n";
+    return result;
+}
+
+std::string arithmetics(const std::string& succ_name, const std::string& arithmetics_name){
+    std::string result;
+    result += sum(succ_name,sum_name(arithmetics_name)) + '\n';
+    result += sub(arithmetics_name+"Sum",sub_name(arithmetics_name)) + '\n';
+    result += eq(arithmetics_name+"Sum",arithmetics_name+"Eq") + '\n'; // TODO: check later if necessary
+    return result;
+}
+
+std::string sum_name(const std::string& arithmetics_name){
+    return arithmetics_name+"Sum";
+}
+
+std::string sub_name(const std::string& arithmetics_name){
+    return arithmetics_name+"Sub";
 }
 
 std::string any_number(const std::string& digits_name,uint max_number,bool logarithmic){
