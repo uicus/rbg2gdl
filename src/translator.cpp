@@ -1,5 +1,6 @@
 #include"translator.hpp"
 #include"gdl_constants.hpp"
+#include"automaton_builder.hpp"
 
 translator::translator(rbg_parser::parsed_game&& pg):
 pg(std::move(pg)),
@@ -29,7 +30,14 @@ void translator::init_to_gdl(void){
     board_to_gdl();
 }
 
+void translator::build_automaton(void){
+    automaton_builder b;
+    pg.get_moves()->accept(b);
+    moves_automaton = b.get_final_result();
+}
+
 std::string translator::to_gdl(void){
+    build_automaton();
     result += section_title(pg.get_name());
     roles_to_gdl();
     init_to_gdl();
