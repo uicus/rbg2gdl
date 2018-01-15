@@ -6,6 +6,8 @@
 #include"pure_game_move.hpp"
 #include"game_move.hpp"
 
+#include<cassert>
+
 class automaton_builder : public rbg_parser::abstract_dispatcher{
         automaton final_result;
         void prepare_pure_move_automaton(const rbg_parser::pure_game_move* letter);
@@ -25,11 +27,11 @@ class automaton_builder : public rbg_parser::abstract_dispatcher{
         void dispatch(const rbg_parser::player_switch& m)override;
         void dispatch(const rbg_parser::condition_check& m)override;
         void dispatch(const rbg_parser::modifier_block& m)override;
-        void dispatch(const rbg_parser::conjunction&)override{};
-        void dispatch(const rbg_parser::alternative&)override{};
-        void dispatch(const rbg_parser::negatable_condition&)override{};
-        void dispatch(const rbg_parser::comparison&)override{};
-        void dispatch(const rbg_parser::move_condition&)override{};
+        void dispatch(const rbg_parser::conjunction&)override{assert(false);};
+        void dispatch(const rbg_parser::alternative&)override{assert(false);};
+        void dispatch(const rbg_parser::negatable_condition&)override{assert(false);};
+        void dispatch(const rbg_parser::comparison&)override{assert(false);};
+        void dispatch(const rbg_parser::move_condition&)override{assert(false);};
         automaton get_final_result(void);
 };
 

@@ -4,18 +4,22 @@
 #include"ons.hpp"
 
 pure_moves_printer::pure_moves_printer(
-    uint& current_predicate_id,
     const std::string& x_name, const std::string& y_name,
     uint& x_name_index, uint& y_name_index,
-    std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index):
+    std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,
+    std::vector<std::pair<const rbg_parser::pure_game_move*,uint>>& moves_to_write, uint& move_predicate_index,
+    std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index):
 final_result(),
-current_predicate_id(current_predicate_id),
 x_name(x_name),
 y_name(y_name),
 x_name_index(x_name_index),
 y_name_index(y_name_index),
 legal_pieces_checkers_to_write(legal_pieces_checkers_to_write),
-legal_pieces_checker_index(legal_pieces_checker_index){
+legal_pieces_checker_index(legal_pieces_checker_index),
+moves_to_write(moves_to_write),
+move_predicate_index(move_predicate_index),
+conditions_to_write(conditions_to_write),
+condition_predicate_index(condition_predicate_index){
 }
 
 std::string pure_moves_printer::get_final_result(void){
@@ -67,4 +71,40 @@ void pure_moves_printer::dispatch(const rbg_parser::ons& m){
         final_result += "    (true "+cell(x_name+std::to_string(x_name_index),y_name+std::to_string(x_name_index),"?piece")+")\n";
         final_result += "    ("+legal_pieces_checker+"_"+std::to_string(get_checker_number(m.get_legal_ons()))+" ?piece)\n";
     }
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::pure_sum& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::pure_concatenation& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::pure_bracketed_move& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::condition_check& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::conjunction& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::alternative& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
+    // TODO: impl
+}
+
+void pure_moves_printer::dispatch(const rbg_parser::move_condition& m){
+    // TODO: impl
 }

@@ -71,8 +71,8 @@ std::string eq(const std::string& sum_name, const std::string& eq_name){
 std::string arithmetics(const std::string& succ_name, const std::string& arithmetics_name){
     std::string result;
     result += sum(succ_name,sum_name(arithmetics_name)) + '\n';
-    result += sub(arithmetics_name+"Sum",sub_name(arithmetics_name)) + '\n';
-    result += eq(arithmetics_name+"Sum",arithmetics_name+"Eq") + '\n'; // TODO: check later if necessary
+    result += sub(sum_name(arithmetics_name),sub_name(arithmetics_name)) + '\n';
+    result += eq(sum_name(arithmetics_name),eq_name(arithmetics_name)) + '\n'; // TODO: check later if necessary
     return result;
 }
 
@@ -82,6 +82,10 @@ std::string sum_name(const std::string& arithmetics_name){
 
 std::string sub_name(const std::string& arithmetics_name){
     return arithmetics_name+"Sub";
+}
+
+std::string eq_name(const std::string& arithmetics_name){
+    return arithmetics_name+"Eq";
 }
 
 std::string any_number(const std::string& digits_name,uint max_number,bool logarithmic){
