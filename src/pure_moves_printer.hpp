@@ -23,8 +23,11 @@ class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         uint& move_predicate_index;
         std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write;
         uint& condition_predicate_index;
-        std::string displacement(const std::string& coord_name, uint& coord_index, int displacement);
+        void displacement(const std::string& coord_name, uint& coord_index, int displacement);
         uint get_checker_number(const std::set<rbg_parser::token>& current_set);
+        pure_moves_printer clone_printer(void);
+        uint get_pure_move_helper_index(const rbg_parser::pure_game_move* pgm);
+        void postpone_pure_move(const rbg_parser::pure_game_move* pgm);
     public:
         pure_moves_printer(
             const std::string& x_name, const std::string& y_name,

@@ -135,3 +135,7 @@ std::string cell(uint x,uint y,const std::string& piece_name){
 std::string cell(const std::string& x_name,const std::string& y_name,const std::string& piece_name){
     return "(cell "+x_name+" "+y_name+" "+piece_name+")";
 }
+
+std::string variable_value(const std::string& variable_name,const std::string& value){
+    return "("+variables_predicate+" "+variable_name+" "+value+")";
+}
