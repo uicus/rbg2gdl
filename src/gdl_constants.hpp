@@ -34,5 +34,6 @@ std::string control(const std::string& player_name);
 std::string cell(uint x,uint y,const std::string& piece_name);
 std::string cell(const std::string& x_name,const std::string& y_name,const std::string& piece_name);
 std::string variable_value(const std::string& variable_name,const std::string& value);
+std::string position_varaible(const std::string& position_name,uint index);
 
 #endif

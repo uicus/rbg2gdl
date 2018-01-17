@@ -6,6 +6,10 @@
 #include"pure_sum.hpp"
 #include"pure_bracketed_move.hpp"
 #include"condition_check.hpp"
+#include"conjunction.hpp"
+#include"alternative.hpp"
+#include"negatable_condition.hpp"
+#include"move_condition.hpp"
 
 pure_moves_printer::pure_moves_printer(
     const std::string& x_name, const std::string& y_name,
@@ -33,20 +37,20 @@ std::string pure_moves_printer::get_final_result(void){
 void pure_moves_printer::displacement(const std::string& coord_name, uint& coord_index, int displacement){
     if(displacement>0){
         final_result +=
-             "    ("+sum_name(board_arithmetics)
-            +" ?"+coord_name+"_"+std::to_string(coord_index)
+             "("+sum_name(board_arithmetics)
+            +" "+position_varaible(coord_name,coord_index)
             +" "+std::to_string(displacement)
-            +" ?"+coord_name+"_"+std::to_string(coord_index+1)
-            +")\n";
+            +" "+position_varaible(coord_name,coord_index+1)
+            +")";
         ++coord_index;
     }
     else if(displacement<0){
         final_result +=
-             "    ("+sub_name(board_arithmetics)
-            +" ?"+coord_name+"_"+std::to_string(coord_index)
+             "("+sub_name(board_arithmetics)
+            +" "+position_varaible(coord_name,coord_index)
             +" "+std::to_string(-displacement)
-            +" ?"+coord_name+"_"+std::to_string(coord_index+1)
-            +")\n";
+            +" "+position_varaible(coord_name,coord_index+1)
+            +")";
         ++coord_index;
     }
 }
@@ -72,17 +76,29 @@ uint pure_moves_printer::get_pure_move_helper_index(const rbg_parser::pure_game_
     return moves_to_write.back().second;
 }
 
+uint pure_moves_printer::get_condition_helper_index(const rbg_parser::condition* c){
+    conditions_to_write.push_back(std::make_pair(c,condition_predicate_index++));
+    return conditions_to_write.back().second;
+}
+
 void pure_moves_printer::postpone_pure_move(const rbg_parser::pure_game_move* pgm){
     final_result += "("+moves_helper_name+"_"+std::to_string(get_pure_move_helper_index(pgm));
-    final_result += " ?"+x_name+"_"+std::to_string(x_name_index)+" ?"+y_name+"_"+std::to_string(y_name_index);
-    final_result += " ?"+x_name+"_"+std::to_string(x_name_index+1)+" ?"+y_name+"_"+std::to_string(y_name_index+1);
+    final_result += " "+position_varaible(x_name,x_name_index)+" "+position_varaible(y_name,y_name_index);
+    final_result += " "+position_varaible(x_name,x_name_index+1)+" "+position_varaible(y_name,y_name_index+1);
     final_result += ")";
     ++x_name_index;
     ++y_name_index;
 }
 
+void pure_moves_printer::postpone_condition(const rbg_parser::condition* c){
+    final_result += "("+moves_helper_name+"_"+std::to_string(get_condition_helper_index(c));
+    final_result += " "+position_varaible(x_name,x_name_index)+" "+position_varaible(y_name,y_name_index);
+    final_result += ")";
+}
+
 void pure_moves_printer::dispatch(const rbg_parser::shift& m){
     displacement(x_name,x_name_index,m.get_x());
+    final_result += "\n    ";
     displacement(y_name,y_name_index,m.get_y());
 }
 
@@ -92,7 +108,7 @@ void pure_moves_printer::dispatch(const rbg_parser::ons& m){
     else if(m.get_legal_ons().size()==1)
         final_result += "(true "+cell(x_name+std::to_string(x_name_index),y_name+std::to_string(x_name_index),m.get_legal_ons().begin()->to_string())+")";
     else{
-        final_result += "(true "+cell(x_name+std::to_string(x_name_index),y_name+std::to_string(x_name_index),"?piece")+")\n";
+        final_result += "(true "+cell(position_varaible(x_name,x_name_index),position_varaible(y_name,y_name_index),"?piece")+")\n";
         final_result += "    ("+legal_pieces_checker+"_"+std::to_string(get_checker_number(m.get_legal_ons()))+" ?piece)";
     }
 }
@@ -139,15 +155,37 @@ void pure_moves_printer::dispatch(const rbg_parser::condition_check& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::conjunction& m){
-    // TODO: impl
+    if(m.get_content().size()>0){
+        auto pmp = clone_printer();
+        m.get_content()[0]->accept(pmp);
+        final_result += pmp.get_final_result();
+    }
+    for(uint i=1;i<m.get_content().size();++i){
+        auto pmp = clone_printer();
+        m.get_content()[0]->accept(pmp);
+        final_result += "\n    "+pmp.get_final_result();
+    }
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::alternative& m){
-    // TODO: impl
+    if(m.get_content().size()==0)
+        final_result += "("+sum_name(board_arithmetics)+" 0 0 1)"; // TODO: Do it in a more elegant way
+    else if(m.get_content().size()==1){
+        auto pmp = clone_printer();
+        m.get_content()[0]->accept(pmp);
+        final_result += pmp.get_final_result();
+    }
+    else
+        postpone_condition(&m);
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
-    // TODO: impl
+    auto pmp = clone_printer();
+    m.get_content()->accept(pmp);
+    if(m.is_negated())
+        final_result += "(not "+pmp.get_final_result()+")"; // TODO: It won't work with conjunctions and concats
+    else
+        final_result += pmp.get_final_result();
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
@@ -155,5 +193,16 @@ void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::move_condition& m){
-    // TODO: impl
+    uint x_temp_index = 0, y_temp_index = 0;
+    if(x_name_index==0)
+        final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(x_name,x_name_index)+" ?"+x_name+"_0)\n    ";
+    if(y_name_index==0)
+        final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(y_name,y_name_index)+" ?"+y_name+"_0)\n    ";
+    pure_moves_printer pmp(
+        x_name+"_"+std::to_string(x_name_index),y_name+"_"+std::to_string(y_name_index),x_temp_index,y_temp_index,
+        legal_pieces_checkers_to_write,legal_pieces_checker_index,
+        moves_to_write,move_predicate_index,
+        conditions_to_write,condition_predicate_index);
+    m.get_content()->accept(pmp);
+    final_result += pmp.get_final_result();
 }

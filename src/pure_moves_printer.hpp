@@ -27,7 +27,9 @@ class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         uint get_checker_number(const std::set<rbg_parser::token>& current_set);
         pure_moves_printer clone_printer(void);
         uint get_pure_move_helper_index(const rbg_parser::pure_game_move* pgm);
+        uint get_condition_helper_index(const rbg_parser::condition* c);
         void postpone_pure_move(const rbg_parser::pure_game_move* pgm);
+        void postpone_condition(const rbg_parser::condition* c);
     public:
         pure_moves_printer(
             const std::string& x_name, const std::string& y_name,

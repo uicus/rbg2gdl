@@ -139,3 +139,7 @@ std::string cell(const std::string& x_name,const std::string& y_name,const std::
 std::string variable_value(const std::string& variable_name,const std::string& value){
     return "("+variables_predicate+" "+variable_name+" "+value+")";
 }
+
+std::string position_varaible(const std::string& position_name,uint index){
+    return "?"+position_name+(index>0 ? "_"+std::to_string(index) : "");
+}
