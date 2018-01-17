@@ -208,30 +208,44 @@ void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
-    final_result += "(";
-    switch(m.get_kind_of_comparison().get_type()){
-        case rbg_parser::double_equal:
-            final_result += eq_name(variables_arithmetics);
-            break;
-        case rbg_parser::not_equal:
-            final_result += neq_name(variables_arithmetics);
-            break;
-        case rbg_parser::greater_equal:
-            final_result += ge_name(variables_arithmetics);
-            break;
-        case rbg_parser::greater:
-            final_result += greater_name(variables_arithmetics);
-            break;
-        case rbg_parser::less_equal:
-            final_result += le_name(variables_arithmetics);
-            break;
-        case rbg_parser::less:
-            final_result +=less_name(variables_arithmetics);
-            break;
-        default:
-            assert(false);
+    if(m.get_left_side().get_type() == rbg_parser::player){
+        switch(m.get_kind_of_comparison().get_type()){
+            case rbg_parser::double_equal:
+                final_result += control(m.get_right_side().to_string());
+                break;
+            case rbg_parser::not_equal:
+                final_result += "(not "+control(m.get_right_side().to_string())+")";
+                break;
+            default:
+                assert(false);
+        }
     }
-    final_result += " "+side_of_comparison(m.get_left_side())+" "+side_of_comparison(m.get_right_side())+")";
+    else{
+        final_result += "(";
+        switch(m.get_kind_of_comparison().get_type()){
+            case rbg_parser::double_equal:
+                final_result += eq_name(variables_arithmetics);
+                break;
+            case rbg_parser::not_equal:
+                final_result += neq_name(variables_arithmetics);
+                break;
+            case rbg_parser::greater_equal:
+                final_result += ge_name(variables_arithmetics);
+                break;
+            case rbg_parser::greater:
+                final_result += greater_name(variables_arithmetics);
+                break;
+            case rbg_parser::less_equal:
+                final_result += le_name(variables_arithmetics);
+                break;
+            case rbg_parser::less:
+                final_result +=less_name(variables_arithmetics);
+                break;
+            default:
+                assert(false);
+        }
+        final_result += " "+side_of_comparison(m.get_left_side())+" "+side_of_comparison(m.get_right_side())+")";
+    }
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::move_condition& m){
