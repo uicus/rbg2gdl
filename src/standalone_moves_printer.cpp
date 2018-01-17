@@ -4,6 +4,8 @@
 #include"pure_sum.hpp"
 #include"pure_bracketed_move.hpp"
 #include"alternative.hpp"
+#include"concatenation.hpp"
+#include"conjunction.hpp"
 
 standalone_moves_printer::standalone_moves_printer(
     uint current_index,
@@ -21,6 +23,10 @@ condition_predicate_index(condition_predicate_index){
 
 void standalone_moves_printer::move_header(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index){
     final_result += "(<= ("+moves_helper_name+"_"+std::to_string(current_index)+" "+position_varaible(x_name,x_index)+" "+position_varaible(y_name,y_index)+" ?"+x_name+"_last ?"+y_name+"_last)\n    ";
+}
+
+void standalone_moves_printer::condition_header(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index){
+    final_result += "(<= ("+conditions_helper_name+"_"+std::to_string(current_index)+" "+position_varaible(x_name,x_index)+" "+position_varaible(y_name,y_index)+")\n    ";
 }
 
 void standalone_moves_printer::move_footer(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index){
@@ -88,11 +94,28 @@ void standalone_moves_printer::dispatch(const rbg_parser::pure_bracketed_move& m
 void standalone_moves_printer::dispatch(const rbg_parser::alternative& m){
     for(const auto& el: m.get_content()){
         uint x_index = 0, y_index = 0;
-        final_result += "(<= ("+conditions_helper_name+"_"+std::to_string(current_index)+" "+position_varaible("x",x_index)+" "+position_varaible("y",y_index)+")\n    ";
+        condition_header("x","y",x_index,y_index);
         auto pmp = clone_printer("x","y",x_index,y_index);
         el->accept(pmp);
         final_result += pmp.get_final_result()+")";
     }
+}
+
+void standalone_moves_printer::dispatch(const rbg_parser::concatenation& m){
+    uint x_index = 0,y_index = 0;
+    move_header("x","y",x_index,y_index);
+    auto pmp = clone_printer("x","y",x_index,y_index);
+    m.accept(pmp);
+    final_result += pmp.get_final_result();
+    move_footer("x","y",x_index,y_index);
+}
+
+void standalone_moves_printer::dispatch(const rbg_parser::conjunction& m){
+    uint x_index = 0, y_index = 0;
+    condition_header("x","y",x_index,y_index);
+    auto pmp = clone_printer("x","y",x_index,y_index);
+    m.accept(pmp);
+    final_result += pmp.get_final_result()+")";
 }
 
 std::string standalone_moves_printer::get_final_result(void){

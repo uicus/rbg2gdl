@@ -23,6 +23,7 @@ class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         uint& move_predicate_index;
         std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write;
         uint& condition_predicate_index;
+        bool standalone_hint;
         void displacement(const std::string& coord_name, uint& coord_index, int displacement);
         uint get_checker_number(const std::set<rbg_parser::token>& current_set);
         pure_moves_printer clone_printer(void);
@@ -30,13 +31,15 @@ class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         uint get_condition_helper_index(const rbg_parser::condition* c);
         void postpone_pure_move(const rbg_parser::pure_game_move* pgm);
         void postpone_condition(const rbg_parser::condition* c);
+        std::string side_of_comparison(const rbg_parser::token& var)const;
     public:
         pure_moves_printer(
             const std::string& x_name, const std::string& y_name,
             uint& x_name_index, uint& y_name_index,
             std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,
             std::vector<std::pair<const rbg_parser::pure_game_move*,uint>>& moves_to_write, uint& move_predicate_index,
-            std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index);
+            std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index,
+            bool standalone_hint = false);
         void dispatch(const rbg_parser::sum&)override{assert(false);};
         void dispatch(const rbg_parser::pure_sum& m)override;
         void dispatch(const rbg_parser::concatenation&)override{assert(false);};

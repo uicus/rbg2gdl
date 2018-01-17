@@ -6,12 +6,12 @@
 #include"types.hpp"
 
 const std::string separator = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
-const std::string no_off = "no_off";
-const std::string semi_turn = "semi_turn";
 const std::string digit = "(digit 0)\n(digit 1)\n";
 const std::string board_succ = "boardSucc";
 const std::string board_arithmetics = "board";
 const std::string repetitions_succ = "repSucc";
+const std::string variables_succ = "variablesSucc";
+const std::string variables_arithmetics = "variables";
 const std::string legal_pieces_checker = "legalPiece";
 const std::string moves_helper_name = "moveHelper";
 const std::string counter_move_helper_name = "moveRepeatingHelper";
@@ -25,9 +25,15 @@ std::string sum(const std::string& succ_name, const std::string& sum_name);
 std::string sub(const std::string& sum_name, const std::string& sub_name);
 std::string eq(const std::string& sum_name, const std::string& eq_name);
 std::string arithmetics(const std::string& succ_name, const std::string& arithmetics_name);
+std::string comaprisons(const std::string arithmetics_name);
 std::string sum_name(const std::string& arithmetics_name);
 std::string sub_name(const std::string& arithmetics_name);
 std::string eq_name(const std::string& arithmetics_name);
+std::string neq_name(const std::string& arithmetics_name);
+std::string ge_name(const std::string& arithmetics_name);
+std::string greater_name(const std::string& arithmetics_name);
+std::string le_name(const std::string& arithmetics_name);
+std::string less_name(const std::string& arithmetics_name);
 std::string any_number(const std::string& digits_name,uint max_number,bool logarithmic=false);
 std::string unary_binary_equivalency(const std::string& name, int max_binary_number, int max_equivalent_number);
 std::string control(const std::string& player_name);

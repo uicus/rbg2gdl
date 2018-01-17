@@ -76,6 +76,16 @@ std::string arithmetics(const std::string& succ_name, const std::string& arithme
     return result;
 }
 
+std::string comaprisons(const std::string arithmetics_name){
+    std::string result;
+    result += "(<= ("+neq_name(arithmetics_name)+" ?x ?y)\n    (not ("+eq_name(arithmetics_name)+" ?x ?y)))\n";
+    result += "(<= ("+ge_name(arithmetics_name)+" ?x ?y)\n    ("+sum_name(arithmetics_name)+" ?z ?y ?x))\n";
+    result += "(<= ("+greater_name(arithmetics_name)+" ?x ?y)\n    ("+ge_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
+    result += "(<= ("+le_name(arithmetics_name)+" ?x ?y)\n    ("+sum_name(arithmetics_name)+" ?z ?x ?y))\n";
+    result += "(<= ("+less_name(arithmetics_name)+" ?x ?y)\n    ("+le_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
+    return result;
+}
+
 std::string sum_name(const std::string& arithmetics_name){
     return arithmetics_name+"Sum";
 }
@@ -86,6 +96,26 @@ std::string sub_name(const std::string& arithmetics_name){
 
 std::string eq_name(const std::string& arithmetics_name){
     return arithmetics_name+"Eq";
+}
+
+std::string neq_name(const std::string& arithmetics_name){
+    return arithmetics_name+"NotEq";
+}
+
+std::string ge_name(const std::string& arithmetics_name){
+    return arithmetics_name+"GrOrEq";
+}
+
+std::string greater_name(const std::string& arithmetics_name){
+    return arithmetics_name+"Gr";
+}
+
+std::string le_name(const std::string& arithmetics_name){
+    return arithmetics_name+"LeOrEq";
+}
+
+std::string less_name(const std::string& arithmetics_name){
+    return arithmetics_name+"Le";
 }
 
 std::string any_number(const std::string& digits_name,uint max_number,bool logarithmic){

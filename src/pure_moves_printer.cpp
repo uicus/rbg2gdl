@@ -10,13 +10,16 @@
 #include"alternative.hpp"
 #include"negatable_condition.hpp"
 #include"move_condition.hpp"
+#include"comparison.hpp"
+#include<cassert>
 
 pure_moves_printer::pure_moves_printer(
     const std::string& x_name, const std::string& y_name,
     uint& x_name_index, uint& y_name_index,
     std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,
     std::vector<std::pair<const rbg_parser::pure_game_move*,uint>>& moves_to_write, uint& move_predicate_index,
-    std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index):
+    std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index,
+    bool standalone_hint):
 final_result(),
 x_name(x_name),
 y_name(y_name),
@@ -27,7 +30,8 @@ legal_pieces_checker_index(legal_pieces_checker_index),
 moves_to_write(moves_to_write),
 move_predicate_index(move_predicate_index),
 conditions_to_write(conditions_to_write),
-condition_predicate_index(condition_predicate_index){
+condition_predicate_index(condition_predicate_index),
+standalone_hint(standalone_hint){
 }
 
 std::string pure_moves_printer::get_final_result(void){
@@ -96,6 +100,13 @@ void pure_moves_printer::postpone_condition(const rbg_parser::condition* c){
     final_result += ")";
 }
 
+std::string pure_moves_printer::side_of_comparison(const rbg_parser::token& var)const{
+    if(var.get_type() == rbg_parser::number)
+        return var.to_string();
+    else
+        return "?"+var.to_string();
+}
+
 void pure_moves_printer::dispatch(const rbg_parser::shift& m){
     displacement(x_name,x_name_index,m.get_x());
     final_result += "\n    ";
@@ -126,15 +137,19 @@ void pure_moves_printer::dispatch(const rbg_parser::pure_sum& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::pure_concatenation& m){
-    if(m.get_content().size()>0){
-        auto pmp = clone_printer();
-        m.get_content()[0]->accept(pmp);
-        final_result += pmp.get_final_result();
-    }
-    for(uint i=1;i<m.get_content().size();++i){
-        auto pmp = clone_printer();
-        m.get_content()[0]->accept(pmp);
-        final_result += "\n    "+pmp.get_final_result();
+    if(standalone_hint)
+        postpone_pure_move(&m);
+    else{
+        if(m.get_content().size()>0){
+            auto pmp = clone_printer();
+            m.get_content()[0]->accept(pmp);
+            final_result += pmp.get_final_result();
+        }
+        for(uint i=1;i<m.get_content().size();++i){
+            auto pmp = clone_printer();
+            m.get_content()[0]->accept(pmp);
+            final_result += "\n    "+pmp.get_final_result();
+        }
     }
 }
 
@@ -155,15 +170,19 @@ void pure_moves_printer::dispatch(const rbg_parser::condition_check& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::conjunction& m){
-    if(m.get_content().size()>0){
-        auto pmp = clone_printer();
-        m.get_content()[0]->accept(pmp);
-        final_result += pmp.get_final_result();
-    }
-    for(uint i=1;i<m.get_content().size();++i){
-        auto pmp = clone_printer();
-        m.get_content()[0]->accept(pmp);
-        final_result += "\n    "+pmp.get_final_result();
+    if(standalone_hint)
+        postpone_condition(&m);
+    else{
+        if(m.get_content().size()>0){
+            auto pmp = clone_printer();
+            m.get_content()[0]->accept(pmp);
+            final_result += pmp.get_final_result();
+        }
+        for(uint i=1;i<m.get_content().size();++i){
+            auto pmp = clone_printer();
+            m.get_content()[0]->accept(pmp);
+            final_result += "\n    "+pmp.get_final_result();
+        }
     }
 }
 
@@ -183,13 +202,36 @@ void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
     auto pmp = clone_printer();
     m.get_content()->accept(pmp);
     if(m.is_negated())
-        final_result += "(not "+pmp.get_final_result()+")"; // TODO: It won't work with conjunctions and concats
+        final_result += "(not "+pmp.get_final_result()+")";
     else
         final_result += pmp.get_final_result();
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
-    // TODO: impl
+    final_result += "(";
+    switch(m.get_kind_of_comparison().get_type()){
+        case rbg_parser::double_equal:
+            final_result += eq_name(variables_arithmetics);
+            break;
+        case rbg_parser::not_equal:
+            final_result += neq_name(variables_arithmetics);
+            break;
+        case rbg_parser::greater_equal:
+            final_result += ge_name(variables_arithmetics);
+            break;
+        case rbg_parser::greater:
+            final_result += greater_name(variables_arithmetics);
+            break;
+        case rbg_parser::less_equal:
+            final_result += le_name(variables_arithmetics);
+            break;
+        case rbg_parser::less:
+            final_result +=less_name(variables_arithmetics);
+            break;
+        default:
+            assert(false);
+    }
+    final_result += " "+side_of_comparison(m.get_left_side())+" "+side_of_comparison(m.get_right_side())+")";
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::move_condition& m){

@@ -26,6 +26,7 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
         uint& condition_predicate_index;
         void move_header(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index);
         void move_footer(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index);
+        void condition_header(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index);
         void star_move(const rbg_parser::pure_game_move* m);
         void power_move(const rbg_parser::pure_game_move* m,uint rep_number);
         pure_moves_printer clone_printer(
@@ -39,7 +40,7 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
             std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index);
         void dispatch(const rbg_parser::sum&)override{assert(false);};
         void dispatch(const rbg_parser::pure_sum& m)override;
-        void dispatch(const rbg_parser::concatenation&)override{assert(false);};
+        void dispatch(const rbg_parser::concatenation& m)override;
         void dispatch(const rbg_parser::pure_concatenation&)override{assert(false);};
         void dispatch(const rbg_parser::bracketed_move&)override{assert(false);};
         void dispatch(const rbg_parser::pure_bracketed_move& m)override;
@@ -50,7 +51,7 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
         void dispatch(const rbg_parser::player_switch&)override{assert(false);};
         void dispatch(const rbg_parser::condition_check&)override{assert(false);};
         void dispatch(const rbg_parser::modifier_block&)override{assert(false);};
-        void dispatch(const rbg_parser::conjunction&)override{assert(false);};
+        void dispatch(const rbg_parser::conjunction& m)override;
         void dispatch(const rbg_parser::alternative& m)override;
         void dispatch(const rbg_parser::negatable_condition&)override{assert(false);};
         void dispatch(const rbg_parser::comparison&)override{assert(false);};
