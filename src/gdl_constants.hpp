@@ -17,6 +17,9 @@ const std::string moves_helper_name = "moveHelper";
 const std::string counter_move_helper_name = "moveRepeatingHelper";
 const std::string conditions_helper_name = "conditionHelper";
 const std::string variables_predicate = "var";
+const std::string transition = "transition";
+const std::string next_player = "nextPlayer";
+const std::string continue_move = "continue_move";
 
 std::string section_title(const std::string& name);
 uint length_of(uint v);

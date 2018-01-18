@@ -32,6 +32,7 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
         pure_moves_printer clone_printer(
             const std::string& x_name,const std::string& y_name,
             uint& x_index,uint& y_index);
+        void use_standard_writer(const rbg_parser::condition* m);
     public:
         standalone_moves_printer(
             uint current_index,
@@ -54,9 +55,15 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
         void dispatch(const rbg_parser::conjunction& m)override;
         void dispatch(const rbg_parser::alternative& m)override;
         void dispatch(const rbg_parser::negatable_condition&)override{assert(false);};
-        void dispatch(const rbg_parser::comparison&)override{assert(false);};
+        void dispatch(const rbg_parser::comparison& m)override;
         void dispatch(const rbg_parser::move_condition&)override{assert(false);};
         std::string get_final_result(void);
 };
+
+std::string write_legal_pieces_checkers(std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write);
+std::string write_all_helpers(
+    std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,
+    std::vector<std::pair<const rbg_parser::pure_game_move*,uint>>& moves_to_write, uint& move_predicate_index,
+    std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index);
 
 #endif

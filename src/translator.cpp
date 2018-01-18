@@ -44,11 +44,17 @@ void translator::build_automaton(void){
     moves_automaton = b.get_final_result();
 }
 
+void translator::automaton_to_gdl(void){
+    result += section_title("Transitions");
+    result += moves_automaton.transitions_to_gdl();
+}
+
 std::string translator::to_gdl(void){
     build_automaton();
     result += section_title(pg.get_name());
     roles_to_gdl();
     init_to_gdl();
     arithmetics_to_gdl();
+    automaton_to_gdl();
     return result;
 }

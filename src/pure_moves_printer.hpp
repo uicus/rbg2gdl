@@ -13,8 +13,8 @@
 
 class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         std::string final_result;
-        const std::string& x_name;
-        const std::string& y_name;
+        const std::string x_name;
+        const std::string y_name;
         uint& x_name_index;
         uint& y_name_index;
         std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write;
@@ -31,7 +31,7 @@ class pure_moves_printer : public rbg_parser::abstract_dispatcher{
         uint get_condition_helper_index(const rbg_parser::condition* c);
         void postpone_pure_move(const rbg_parser::pure_game_move* pgm);
         void postpone_condition(const rbg_parser::condition* c);
-        std::string side_of_comparison(const rbg_parser::token& var)const;
+        std::string side_of_comparison(const rbg_parser::token& var, const std::string& alias);
     public:
         pure_moves_printer(
             const std::string& x_name, const std::string& y_name,

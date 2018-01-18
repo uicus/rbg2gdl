@@ -17,9 +17,11 @@ class automaton{
         void concat_automaton(automaton&& concatee);
         void concat_automaton_by_epsilon(automaton&& concatee);
         void concat_automaton_by_start_state(automaton&& concatee);
+        std::string turn_changers_to_gdl(void)const;
     public:
         void starify_automaton(void);
         void repeat_automaton(uint times);
+        std::string transitions_to_gdl(void);
         friend automaton pure_letter_automaton(const rbg_parser::pure_game_move* label);
         friend automaton modifier_automaton(const rbg_parser::game_move* action);
         friend automaton sum_of_automatons(std::vector<automaton>&& elements);

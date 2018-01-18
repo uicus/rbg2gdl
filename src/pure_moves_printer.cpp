@@ -100,11 +100,13 @@ void pure_moves_printer::postpone_condition(const rbg_parser::condition* c){
     final_result += ")";
 }
 
-std::string pure_moves_printer::side_of_comparison(const rbg_parser::token& var)const{
+std::string pure_moves_printer::side_of_comparison(const rbg_parser::token& var, const std::string& alias){
     if(var.get_type() == rbg_parser::number)
         return var.to_string();
-    else
-        return "?"+var.to_string();
+    else{
+        final_result += variable_value(var.to_string(),"?"+alias)+"\n    ";
+        return "?"+alias;
+    }
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::shift& m){
@@ -147,7 +149,7 @@ void pure_moves_printer::dispatch(const rbg_parser::pure_concatenation& m){
         }
         for(uint i=1;i<m.get_content().size();++i){
             auto pmp = clone_printer();
-            m.get_content()[0]->accept(pmp);
+            m.get_content()[i]->accept(pmp);
             final_result += "\n    "+pmp.get_final_result();
         }
     }
@@ -180,7 +182,7 @@ void pure_moves_printer::dispatch(const rbg_parser::conjunction& m){
         }
         for(uint i=1;i<m.get_content().size();++i){
             auto pmp = clone_printer();
-            m.get_content()[0]->accept(pmp);
+            m.get_content()[i]->accept(pmp);
             final_result += "\n    "+pmp.get_final_result();
         }
     }
@@ -201,8 +203,10 @@ void pure_moves_printer::dispatch(const rbg_parser::alternative& m){
 void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
     auto pmp = clone_printer();
     m.get_content()->accept(pmp);
-    if(m.is_negated())
+    if(m.is_negated()){
+        pmp.standalone_hint = true;
         final_result += "(not "+pmp.get_final_result()+")";
+    }
     else
         final_result += pmp.get_final_result();
 }
@@ -221,30 +225,36 @@ void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
         }
     }
     else{
-        final_result += "(";
-        switch(m.get_kind_of_comparison().get_type()){
-            case rbg_parser::double_equal:
-                final_result += eq_name(variables_arithmetics);
-                break;
-            case rbg_parser::not_equal:
-                final_result += neq_name(variables_arithmetics);
-                break;
-            case rbg_parser::greater_equal:
-                final_result += ge_name(variables_arithmetics);
-                break;
-            case rbg_parser::greater:
-                final_result += greater_name(variables_arithmetics);
-                break;
-            case rbg_parser::less_equal:
-                final_result += le_name(variables_arithmetics);
-                break;
-            case rbg_parser::less:
-                final_result +=less_name(variables_arithmetics);
-                break;
-            default:
-                assert(false);
+        if(standalone_hint)
+            postpone_condition(&m);
+        else{
+            std::string left_side = side_of_comparison(m.get_left_side(),"value1");
+            std::string right_side = side_of_comparison(m.get_right_side(),"value2");
+            final_result += "(";
+            switch(m.get_kind_of_comparison().get_type()){
+                case rbg_parser::double_equal:
+                    final_result += eq_name(variables_arithmetics);
+                    break;
+                case rbg_parser::not_equal:
+                    final_result += neq_name(variables_arithmetics);
+                    break;
+                case rbg_parser::greater_equal:
+                    final_result += ge_name(variables_arithmetics);
+                    break;
+                case rbg_parser::greater:
+                    final_result += greater_name(variables_arithmetics);
+                    break;
+                case rbg_parser::less_equal:
+                    final_result += le_name(variables_arithmetics);
+                    break;
+                case rbg_parser::less:
+                    final_result +=less_name(variables_arithmetics);
+                    break;
+                default:
+                    assert(false);
+            }
+            final_result += " "+left_side+" "+right_side+")";
         }
-        final_result += " "+side_of_comparison(m.get_left_side())+" "+side_of_comparison(m.get_right_side())+")";
     }
 }
 

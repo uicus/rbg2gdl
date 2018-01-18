@@ -6,6 +6,7 @@
 #include"alternative.hpp"
 #include"concatenation.hpp"
 #include"conjunction.hpp"
+#include"comparison.hpp"
 
 standalone_moves_printer::standalone_moves_printer(
     uint current_index,
@@ -83,6 +84,14 @@ pure_moves_printer standalone_moves_printer::clone_printer(
         conditions_to_write,condition_predicate_index);
 }
 
+void standalone_moves_printer::use_standard_writer(const rbg_parser::condition* m){
+    uint x_index = 0, y_index = 0;
+    condition_header("x","y",x_index,y_index);
+    auto pmp = clone_printer("x","y",x_index,y_index);
+    m->accept(pmp);
+    final_result += pmp.get_final_result()+")";
+}
+
 void standalone_moves_printer::dispatch(const rbg_parser::pure_bracketed_move& m){
     // TODO: prolog safety!
     if(m.is_star())
@@ -111,13 +120,58 @@ void standalone_moves_printer::dispatch(const rbg_parser::concatenation& m){
 }
 
 void standalone_moves_printer::dispatch(const rbg_parser::conjunction& m){
-    uint x_index = 0, y_index = 0;
-    condition_header("x","y",x_index,y_index);
-    auto pmp = clone_printer("x","y",x_index,y_index);
-    m.accept(pmp);
-    final_result += pmp.get_final_result()+")";
+    use_standard_writer(&m);
+}
+
+void standalone_moves_printer::dispatch(const rbg_parser::comparison& m){
+    use_standard_writer(&m);
 }
 
 std::string standalone_moves_printer::get_final_result(void){
     return std::move(final_result);
+}
+
+std::string write_legal_pieces_checkers(std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write){
+    std::string result;
+    for(const auto& el: legal_pieces_checkers_to_write){
+        for(const auto& t: el.first)
+            result += "("+legal_pieces_checker+"_"+std::to_string(el.second)+" "+t.to_string()+")\n";
+        result += "\n";
+    }
+    return result;
+}
+
+std::string write_all_helpers(
+    std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,
+    std::vector<std::pair<const rbg_parser::pure_game_move*,uint>>& moves_to_write, uint& move_predicate_index,
+    std::vector<std::pair<const rbg_parser::condition*,uint>>& conditions_to_write, uint& condition_predicate_index){
+    std::string result;
+    while(!moves_to_write.empty() || !conditions_to_write.empty()){
+        while(!moves_to_write.empty()){
+            auto pgm = moves_to_write.back().first;
+            uint index = moves_to_write.back().second;
+            moves_to_write.pop_back();
+            standalone_moves_printer smp(
+                index,
+                legal_pieces_checkers_to_write,legal_pieces_checker_index,
+                moves_to_write,move_predicate_index,
+                conditions_to_write,condition_predicate_index);
+            pgm->accept(smp);
+            result += smp.get_final_result()+"\n\n";
+        }
+        while(!conditions_to_write.empty()){
+            auto c = conditions_to_write.back().first;
+            uint index = conditions_to_write.back().second;
+            conditions_to_write.pop_back();
+            standalone_moves_printer smp(
+                index,
+                legal_pieces_checkers_to_write,legal_pieces_checker_index,
+                moves_to_write,move_predicate_index,
+                conditions_to_write,condition_predicate_index);
+            c->accept(smp);
+            result += smp.get_final_result()+"\n\n";
+        }
+    }
+    result += write_legal_pieces_checkers(legal_pieces_checkers_to_write);
+    return result;
 }

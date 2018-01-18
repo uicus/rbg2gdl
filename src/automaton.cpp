@@ -1,5 +1,8 @@
 #include"automaton.hpp"
+#include"standalone_moves_printer.hpp"
 #include<cassert>
+#include<map>
+#include<set>
 
 automaton pure_letter_automaton(const rbg_parser::pure_game_move* label){
     automaton result;
@@ -104,4 +107,36 @@ void automaton::repeat_automaton(uint times){
     assert(times>1);
     for(uint i=0;i<times-1;++i)
         concat_automaton(automaton(*this));
+}
+
+std::string automaton::turn_changers_to_gdl(void)const{
+    std::string result;
+    for(const auto& el: local_register)
+        result += el.write_if_turn_changer();
+    return result;
+}
+
+std::string automaton::transitions_to_gdl(void){
+    std::string result;
+    result += turn_changers_to_gdl();
+    result += '\n';
+    std::map<std::set<rbg_parser::token>,uint> legal_pieces_checkers_to_write;
+    uint legal_pieces_checker_index = 0;
+    std::vector<std::pair<const rbg_parser::pure_game_move*,uint>> moves_to_write;
+    uint move_predicate_index = 0;
+    std::vector<std::pair<const rbg_parser::condition*,uint>> conditions_to_write;
+    uint condition_predicate_index = 0;
+    for(const auto& el: local_register)
+        result += el.write_transitions(
+            local_register,
+            legal_pieces_checkers_to_write,legal_pieces_checker_index,
+            moves_to_write,move_predicate_index,
+            conditions_to_write,condition_predicate_index) + "\n";
+    result += '\n';
+    result += write_all_helpers(
+        legal_pieces_checkers_to_write,legal_pieces_checker_index,
+        moves_to_write,move_predicate_index,
+        conditions_to_write,condition_predicate_index);
+    result += '\n';
+    return result;
 }
