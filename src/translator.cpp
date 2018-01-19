@@ -29,6 +29,9 @@ void translator::init_to_gdl(void){
     result += section_title("Init");
     first_player_to_gdl();
     board_to_gdl();
+    result += "(init ("+current_state+" "+std::to_string(moves_automaton.get_start_state())+"))\n";
+    result += "(init ("+current_cell+" 0 0))\n";
+    result += '\n';
 }
 
 void translator::arithmetics_to_gdl(void){
@@ -49,6 +52,11 @@ void translator::automaton_to_gdl(void){
     result += moves_automaton.transitions_to_gdl();
 }
 
+void translator::modifiers_to_gdl(void){
+    result += section_title("Modifiers");
+    result += moves_automaton.effects_to_gdl();
+}
+
 std::string translator::to_gdl(void){
     build_automaton();
     result += section_title(pg.get_name());
@@ -56,5 +64,6 @@ std::string translator::to_gdl(void){
     init_to_gdl();
     arithmetics_to_gdl();
     automaton_to_gdl();
+    modifiers_to_gdl();
     return result;
 }

@@ -1,6 +1,7 @@
 #include"state.hpp"
 #include"gdl_constants.hpp"
 #include"pure_moves_printer.hpp"
+#include"modifiers_printer.hpp"
 #include<cassert>
 
 uint state::next_id = 0;
@@ -57,21 +58,18 @@ void state::absorb(state&& rhs){
         action = rhs.action;
 }
 
-std::string state::write_if_turn_changer(void)const{
-    if(action==nullptr)
-        return "";
-    if(!action->has_finisher())
-        return "";
-    const rbg_parser::token& next = action->finisher();
-    if(next.get_type() == rbg_parser::dummy)
-        return "("+next_player+" "+std::to_string(id)+" "+continue_move+")\n";
-    else
-        return "("+next_player+" "+std::to_string(id)+" "+next.to_string()+")\n";
+std::string state::epsilon_transition(uint destination_id)const{
+    return "("+epsilon+" "+std::to_string(id)+" "+std::to_string(destination_id)+")\n";
 }
 
-std::string state::epsilon_transition(uint destination_id)const{
-    return "(<= ("+transition+" "+std::to_string(id)+" ?x ?y "+std::to_string(destination_id)+" ?x ?y)\n"
-         + "    (file ?x)\n    (rank ?y))\n";
+std::string state::write_effect(void)const{
+    if(action==nullptr)
+        return "";
+    else{
+        modifiers_printer mp(id);
+        action->accept(mp);
+        return mp.get_final_result()+'\n';
+    }
 }
 
 std::string state::write_transitions(
@@ -95,8 +93,8 @@ std::string state::write_transitions(
                 conditions_to_write,condition_predicate_index);
             el.get_label()->accept(pmp);
             result += pmp.get_final_result();
-            result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible("x",x_index)+" ?x_last)\n";
-            result += "\n    ("+eq_name(board_arithmetics)+" ?"+position_varaible("y",y_index)+" ?y_last))\n";
+            result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible("x",x_index)+" ?x_last)";
+            result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible("y",y_index)+" ?y_last))\n";
         }
     }
     return result;

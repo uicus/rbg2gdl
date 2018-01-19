@@ -111,7 +111,8 @@ std::string pure_moves_printer::side_of_comparison(const rbg_parser::token& var,
 
 void pure_moves_printer::dispatch(const rbg_parser::shift& m){
     displacement(x_name,x_name_index,m.get_x());
-    final_result += "\n    ";
+    if(m.get_x()!=0 && m.get_y()!=0)
+        final_result += "\n    ";
     displacement(y_name,y_name_index,m.get_y());
 }
 

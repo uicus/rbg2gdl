@@ -1,5 +1,6 @@
 #include"automaton.hpp"
 #include"standalone_moves_printer.hpp"
+#include"gdl_constants.hpp"
 #include<cassert>
 #include<map>
 #include<set>
@@ -109,17 +110,17 @@ void automaton::repeat_automaton(uint times){
         concat_automaton(automaton(*this));
 }
 
-std::string automaton::turn_changers_to_gdl(void)const{
+std::string automaton::effects_to_gdl(void){
     std::string result;
     for(const auto& el: local_register)
-        result += el.write_if_turn_changer();
+        result += el.write_effect();
     return result;
 }
 
 std::string automaton::transitions_to_gdl(void){
     std::string result;
-    result += turn_changers_to_gdl();
-    result += '\n';
+    result += "(<= ("+transition+" ?s1 ?x ?y ?s2 ?x ?y)\n";
+    result += "    (epsilon ?s1 ?s2)\n    (file ?x)\n    (rank ?y))\n\n";
     std::map<std::set<rbg_parser::token>,uint> legal_pieces_checkers_to_write;
     uint legal_pieces_checker_index = 0;
     std::vector<std::pair<const rbg_parser::pure_game_move*,uint>> moves_to_write;
@@ -139,4 +140,8 @@ std::string automaton::transitions_to_gdl(void){
         conditions_to_write,condition_predicate_index);
     result += '\n';
     return result;
+}
+
+uint automaton::get_start_state(void){
+    return local_register[start_state].get_id();
 }

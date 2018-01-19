@@ -32,7 +32,7 @@ class state{
         void connect_with_state(uint index_in_local_register, const rbg_parser::pure_game_move* label_condition=nullptr);
         bool modifier(void)const;
         void absorb(state&& rhs);
-        std::string write_if_turn_changer(void)const;
+        std::string write_effect(void)const;
         std::string write_transitions(
             const std::vector<state>& local_register,
             std::map<std::set<rbg_parser::token>,uint>& legal_pieces_checkers_to_write, uint& legal_pieces_checker_index,

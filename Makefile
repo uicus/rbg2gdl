@@ -3,7 +3,7 @@ EXEC = rbg2gdl
 INC = -IrbgParser/src
 CXXFLAGS = -Wall -Wextra -Wpedantic -std=c++11 -O3 -flto -s $(INC)
 CXXFLAGSDEBUG = -Wall -Wextra -Wpedantic -std=c++11 -g $(INC)
-OBJECTS = src/translator.o src/gdl_constants.o src/state.o src/edge.o src/automaton.o src/automaton_builder.o src/pure_moves_printer.o src/standalone_moves_printer.o
+OBJECTS = src/translator.o src/gdl_constants.o src/state.o src/edge.o src/automaton.o src/automaton_builder.o src/pure_moves_printer.o src/standalone_moves_printer.o src/modifiers_printer.o
 
 all: $(OBJECTS)
 	cd rbgParser && make lib

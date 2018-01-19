@@ -20,6 +20,11 @@ const std::string variables_predicate = "var";
 const std::string transition = "transition";
 const std::string next_player = "nextPlayer";
 const std::string continue_move = "continue_move";
+const std::string epsilon = "epsilon";
+const std::string current_state = "currentState";
+const std::string current_cell = "currentCell";
+const std::string cell_change = "off";
+const std::string var_assignment = "assignment";
 
 std::string section_title(const std::string& name);
 uint length_of(uint v);

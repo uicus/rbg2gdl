@@ -31,8 +31,8 @@ void standalone_moves_printer::condition_header(const std::string& x_name, const
 }
 
 void standalone_moves_printer::move_footer(const std::string& x_name, const std::string& y_name,uint x_index,uint y_index){
-    final_result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible(x_name,x_index)+" ?"+x_name+"_last)\n";
-    final_result += "\n    ("+eq_name(board_arithmetics)+" ?"+position_varaible(y_name,y_index)+" ?"+y_name+"_last))\n\n";
+    final_result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible(x_name,x_index)+" ?"+x_name+"_last)";
+    final_result += "\n    ("+eq_name(board_arithmetics)+" "+position_varaible(y_name,y_index)+" ?"+y_name+"_last))\n";
 }
 
 void standalone_moves_printer::dispatch(const rbg_parser::pure_sum& m){
@@ -55,7 +55,7 @@ void standalone_moves_printer::star_move(const rbg_parser::pure_game_move* m){
     auto pmp = clone_printer("x","y",x_index,y_index);
     m->accept(pmp);
     final_result += pmp.get_final_result();
-    final_result += "    ("+moves_helper_name+"_"+std::to_string(current_index)+" "+position_varaible("x",x_index)+" "+position_varaible("y",y_index)+" ?x_last ?y_last))\n\n";
+    final_result += "\n    ("+moves_helper_name+"_"+std::to_string(current_index)+" "+position_varaible("x",x_index)+" "+position_varaible("y",y_index)+" ?x_last ?y_last))\n";
 }
 
 void standalone_moves_printer::power_move(const rbg_parser::pure_game_move* m,uint rep_number){
@@ -71,7 +71,7 @@ void standalone_moves_printer::power_move(const rbg_parser::pure_game_move* m,ui
     m->accept(pmp);
     final_result += pmp.get_final_result();
     final_result += "    ("+repetitions_succ+" ?prevn ?n)\n";
-    final_result += "    ("+counter_move_helper_name+"_"+std::to_string(current_index)+" "+position_varaible("x",x_index)+" "+position_varaible("y",y_index)+" ?x_last ?y_last ?prevn))\n\n";
+    final_result += "\n    ("+counter_move_helper_name+"_"+std::to_string(current_index)+" "+position_varaible("x",x_index)+" "+position_varaible("y",y_index)+" ?x_last ?y_last ?prevn))\n";
 }
 
 pure_moves_printer standalone_moves_printer::clone_printer(
@@ -157,7 +157,7 @@ std::string write_all_helpers(
                 moves_to_write,move_predicate_index,
                 conditions_to_write,condition_predicate_index);
             pgm->accept(smp);
-            result += smp.get_final_result()+"\n\n";
+            result += smp.get_final_result()+"\n";
         }
         while(!conditions_to_write.empty()){
             auto c = conditions_to_write.back().first;
@@ -169,9 +169,10 @@ std::string write_all_helpers(
                 moves_to_write,move_predicate_index,
                 conditions_to_write,condition_predicate_index);
             c->accept(smp);
-            result += smp.get_final_result()+"\n\n";
+            result += smp.get_final_result()+"\n";
         }
     }
+    result += '\n';
     result += write_legal_pieces_checkers(legal_pieces_checkers_to_write);
     return result;
 }

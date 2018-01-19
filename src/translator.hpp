@@ -17,6 +17,7 @@ class translator{
         void arithmetics_to_gdl(void);
         void build_automaton(void);
         void automaton_to_gdl(void);
+        void modifiers_to_gdl(void);
     public:
         translator(rbg_parser::parsed_game&& pg);
         std::string to_gdl(void);
