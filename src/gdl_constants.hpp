@@ -25,6 +25,17 @@ const std::string current_state = "currentState";
 const std::string current_cell = "currentCell";
 const std::string cell_change = "off";
 const std::string var_assignment = "assignment";
+const std::string modifier_name = "modifier";
+const std::string modifier_header = "(<= ("+modifier_name+" ?q)\n";
+const std::string modifier_because_turn_change = modifier_header+"    ("+next_player+" ?q ?player))\n";
+const std::string modifier_because_off = modifier_header+"    ("+cell_change+" ?q ?piece))\n";
+const std::string modifier_because_assignment = modifier_header+"    ("+var_assignment+" ?q ?var ?val))\n";
+const std::string noop = "noop";
+const std::string accept = "acceptState";
+const std::string finisher = "finisher";
+const std::string move_name = "move";
+const std::string affected_cell_name = "affectedCell";
+const std::string affected_var_name = "affectedVar";
 
 std::string section_title(const std::string& name);
 uint length_of(uint v);
@@ -49,5 +60,9 @@ std::string cell(uint x,uint y,const std::string& piece_name);
 std::string cell(const std::string& x_name,const std::string& y_name,const std::string& piece_name);
 std::string variable_value(const std::string& variable_name,const std::string& value);
 std::string position_varaible(const std::string& position_name,uint index);
+std::string move_predicate(uint k_straightness);
+std::string legal(uint k_straightness);
+std::string affected(uint k_straightness);
+std::string next_control(uint k_straightness);
 
 #endif

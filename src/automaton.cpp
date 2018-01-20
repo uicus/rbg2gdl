@@ -112,6 +112,10 @@ void automaton::repeat_automaton(uint times){
 
 std::string automaton::effects_to_gdl(void){
     std::string result;
+    result += "("+accept+" "+std::to_string(local_register[accept_state].get_id())+")\n";
+    result += "(<= ("+finisher+" ?q)\n    ("+next_player+" ?q ?player))\n";
+    result += "(<= ("+finisher+" ?q)\n    ("+accept+" ?q))\n";
+    result += "\n";
     for(const auto& el: local_register)
         result += el.write_effect();
     return result;

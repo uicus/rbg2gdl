@@ -173,3 +173,75 @@ std::string variable_value(const std::string& variable_name,const std::string& v
 std::string position_varaible(const std::string& position_name,uint index){
     return "?"+position_name+(index>0 ? "_"+std::to_string(index) : "");
 }
+
+std::string move_predicate(uint k_straightness){
+    std::string result;
+    result += "("+move_name;
+    for(uint i=0;i<k_straightness;++i){
+        std::string number = std::to_string(i+1);
+        result += " ?q"+number+" ?x"+number+" ?y"+number;
+    }
+    result += ")";
+    return result;
+}
+
+std::string legal(uint k_straightness){
+    std::string result;
+    result += "(<= (legal ?player "+noop+")\n    (role ?player)\n    (not (true "+control("?player")+")))\n";
+    result += "(<= (legal ?player "+move_predicate(k_straightness)+")\n    ";
+    result += "(true "+control("?player")+")\n    ";
+    result += "(true ("+current_state+" ?q0))\n    ";
+    result += "(true ("+current_cell+" ?x0 ?y0))\n    ";
+    for(uint i=0;i<k_straightness;++i){
+        std::string prev_number = std::to_string(i);
+        std::string number = std::to_string(i+1);
+        result += "("+transition+" ?q"+prev_number+" ?x"+prev_number+" ?y"+prev_number+" ?q"+number+" ?x"+number+" ?y"+number+")\n    ";
+    }
+    for(uint i=0;i<k_straightness-1;++i)
+        result += "("+modifier_name+" ?q"+std::to_string(i+1)+")\n    ";
+    result += "("+finisher+" ?q"+std::to_string(k_straightness)+"))\n";
+    result += '\n';
+    return result;
+}
+
+std::string affected(uint k_straightness){
+    std::string result;
+    for(uint i=0;i<k_straightness;++i){
+        std::string number = std::to_string(i+1);
+        result += "(<= ("+affected_cell_name+" ?x"+number+" ?y"+number+")\n    ";
+        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
+        result += "("+cell_change+" ?q"+number+" ?piece))\n";
+    }
+    result += '\n';
+    for(uint i=0;i<k_straightness;++i){
+        std::string number = std::to_string(i+1);
+        result += "(<= ("+affected_cell_name+" ?var)\n    ";
+        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
+        result += "(not (true "+cell("?x"+number,"?y"+number,"?var")+"))\n    ";
+        result += "("+cell_change+" ?q"+number+" ?var))\n";
+        result += "(<= ("+affected_cell_name+" ?varPrev)\n    ";
+        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
+        result += "(true "+cell("?x"+number,"?y"+number,"?varPrev")+")\n    ";
+        result += "("+cell_change+" ?q"+number+" ?var)\n    ";
+        result += "(distinct ?varPrev ?var))\n";
+    }
+    result += '\n';
+    return result;
+}
+
+std::string next_control(uint k_straightness){
+    std::string result;
+    result += "(<= (next "+control("?player")+")\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" ?player)\n    ";
+    result += "(role ?player))\n";
+    result += "(<= (next "+control("?player")+")\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" "+continue_move+")\n    ";
+    result += "(true "+control("?player")+"))\n";
+    result += "(<= (next "+control("?player")+")\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "(not ("+next_player+" ?q"+std::to_string(k_straightness)+" ?nextPlayer))\n    ";
+    result += "(true "+control("?player")+"))\n";
+    return result;
+}

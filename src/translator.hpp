@@ -18,6 +18,8 @@ class translator{
         void build_automaton(void);
         void automaton_to_gdl(void);
         void modifiers_to_gdl(void);
+        void legal_to_gdl(void);
+        void next_state(void);
     public:
         translator(rbg_parser::parsed_game&& pg);
         std::string to_gdl(void);

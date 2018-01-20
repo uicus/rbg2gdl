@@ -54,7 +54,22 @@ void translator::automaton_to_gdl(void){
 
 void translator::modifiers_to_gdl(void){
     result += section_title("Modifiers");
+    result += modifier_because_turn_change;
+    result += modifier_because_off;
+    result += modifier_because_assignment;
+    result += "\n\n";
     result += moves_automaton.effects_to_gdl();
+}
+
+void translator::legal_to_gdl(void){
+    result += section_title("Legal");
+    result += legal(pg.get_straightness()+1);
+}
+
+void translator::next_state(void){
+    result += section_title("Next state");
+    result += affected(pg.get_straightness()+1);
+    result += next_control(pg.get_straightness()+1);
 }
 
 std::string translator::to_gdl(void){
@@ -65,5 +80,7 @@ std::string translator::to_gdl(void){
     arithmetics_to_gdl();
     automaton_to_gdl();
     modifiers_to_gdl();
+    legal_to_gdl();
+    next_state();
     return result;
 }
