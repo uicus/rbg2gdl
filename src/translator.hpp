@@ -20,6 +20,8 @@ class translator{
         void modifiers_to_gdl(void);
         void legal_to_gdl(void);
         void next_state(void);
+        void variables_logic(void);
+        void identifiers_recognition(void);
     public:
         translator(rbg_parser::parsed_game&& pg);
         std::string to_gdl(void);

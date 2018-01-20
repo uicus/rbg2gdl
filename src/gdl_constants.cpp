@@ -5,6 +5,14 @@ std::string section_title(const std::string& name){
     return separator+";; "+name+'\n'+separator+'\n';
 }
 
+std::string piece_type(const std::string& var){
+    return "(pieceType "+var+")";
+}
+
+std::string variable_type(const std::string& var){
+    return "(variableType "+var+")";
+}
+
 uint length_of(uint v){
     uint i;
     for(i=0;v>>=1;++i);
@@ -41,6 +49,18 @@ std::string succ(const std::string& name, uint max_number, bool logarithmic){
         for(uint i=0;i<max_number-1;++i)
             result += "("+name+' '+std::to_string(i)+' '+std::to_string(i+1)+")\n";
     return result+'\n';
+}
+
+std::string pairwise_succ(const std::string& name, uint max_x,uint max_y){
+    std::string result;
+    for(uint i=0;i<max_x;++i){
+        if(i>0)
+            result += "("+name+" "+std::to_string(i-1)+" "+std::to_string(max_y-1)+" "+std::to_string(i)+" 0)\n";
+        for(uint j=0;j<max_y-1;++j)
+            result += "("+name+" "+std::to_string(i)+" "+std::to_string(j)+" "+std::to_string(i)+" "+std::to_string(j+1)+")\n";
+    }
+    result += '\n';
+    return result;
 }
 
 std::string sum(const std::string& succ_name, const std::string& sum_name){
@@ -83,6 +103,7 @@ std::string comaprisons(const std::string arithmetics_name){
     result += "(<= ("+greater_name(arithmetics_name)+" ?x ?y)\n    ("+ge_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
     result += "(<= ("+le_name(arithmetics_name)+" ?x ?y)\n    ("+sum_name(arithmetics_name)+" ?z ?x ?y))\n";
     result += "(<= ("+less_name(arithmetics_name)+" ?x ?y)\n    ("+le_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
+    result += '\n';
     return result;
 }
 
@@ -215,15 +236,9 @@ std::string affected(uint k_straightness){
     result += '\n';
     for(uint i=0;i<k_straightness;++i){
         std::string number = std::to_string(i+1);
-        result += "(<= ("+affected_cell_name+" ?var)\n    ";
+        result += "(<= ("+affected_var_name+" ?var)\n    ";
         result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
-        result += "(not (true "+cell("?x"+number,"?y"+number,"?var")+"))\n    ";
-        result += "("+cell_change+" ?q"+number+" ?var))\n";
-        result += "(<= ("+affected_cell_name+" ?varPrev)\n    ";
-        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
-        result += "(true "+cell("?x"+number,"?y"+number,"?varPrev")+")\n    ";
-        result += "("+cell_change+" ?q"+number+" ?var)\n    ";
-        result += "(distinct ?varPrev ?var))\n";
+        result += "("+var_assignment+" ?q"+number+" ?var ?val))\n";
     }
     result += '\n';
     return result;
@@ -243,5 +258,49 @@ std::string next_control(uint k_straightness){
     result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
     result += "(not ("+next_player+" ?q"+std::to_string(k_straightness)+" ?nextPlayer))\n    ";
     result += "(true "+control("?player")+"))\n";
+    result += '\n';
+    return result;
+}
+
+std::string next_turn(uint k_straightness, const std::string& turn_succ_name){
+    std::string result;
+    result += "(<= (next ("+turn_name+" ?next))\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" ?player)\n    ";
+    result += "(true ("+turn_name+" ?n))\n    ";
+    result += "("+turn_succ_name+" ?n ?next))\n";
+    result += "(<= (next ("+turn_name+" ?n))\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" "+continue_move+")\n    ";
+    result += "(true ("+turn_name+" ?n)))\n";
+    result += "(<= (next ("+turn_name+" ?n))\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "(not ("+next_player+" ?q"+std::to_string(k_straightness)+" ?nextPlayer))\n    ";
+    result += "(true ("+turn_name+" ?n)))\n";
+    result += '\n';
+    return result;
+}
+
+std::string capture_count(const std::string& pair_succ_name, const std::string& succ_name, uint max_x, uint max_y){
+    std::string result;
+    result += "(<= ("+capture_count_name+" ?piece ?val)\n    ";
+    result += "("+capture_count_helper_name+" ?piece ?val "+std::to_string(max_x-1)+" "+std::to_string(max_y-1)+"))\n";
+    result += "(<= ("+capture_count_helper_name+" ?piece 0 0 0)\n    ";
+    result += cell(0,0,"?anotherPiece")+"\n    ";
+    result += "(distinct ?piece ?anotherPiece))\n";
+    result += "(<= ("+capture_count_helper_name+" ?piece 1 0 0)\n    ";
+    result += cell(0,0,"?piece")+")\n";
+    result += "(<= ("+capture_count_helper_name+" ?piece ?n ?x ?y)\n    ";
+    result += cell(0,0,"?anotherPiece")+"\n    ";
+    result += "(distinct ?piece ?anotherPiece)\n    ";
+    result += "("+pair_succ_name+" ?prevx ?prevy ?x ?y)\n    ";
+    result += "("+capture_count_helper_name+" ?piece ?n ?prevx ?prevy))\n";
+    result += "(<= ("+capture_count_helper_name+" ?piece ?n ?x ?y)\n    ";
+    result += cell(0,0,"?piece")+"\n    ";
+    result += "(distinct ?piece ?anotherPiece)\n    ";
+    result += "("+pair_succ_name+" ?prevx ?prevy ?x ?y)\n    ";
+    result += "("+succ_name+" ?prevn ?n)\n    ";
+    result += "("+capture_count_helper_name+" ?piece ?prevn ?prevx ?prevy))\n";
+    result += '\n';
     return result;
 }

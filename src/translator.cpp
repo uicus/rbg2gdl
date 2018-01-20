@@ -31,14 +31,17 @@ void translator::init_to_gdl(void){
     board_to_gdl();
     result += "(init ("+current_state+" "+std::to_string(moves_automaton.get_start_state())+"))\n";
     result += "(init ("+current_cell+" 0 0))\n";
+    result += "(init ("+turn_name+" 0))\n";
+    result += "(<= (init ("+variable_count+" ?variable 0))\n    "+variable_type("?variable")+")\n";
     result += '\n';
 }
 
 void translator::arithmetics_to_gdl(void){
-    result += section_title("Arithmetics");
+    result += section_title("Board arithmetics");
     uint board_max = std::max(pg.get_board().get_height(),pg.get_board().get_width());
     result += succ(board_succ,board_max);
     result += arithmetics(board_succ,board_arithmetics);
+    result += pairwise_succ(pairwise_board_succ,pg.get_board().get_height(),pg.get_board().get_width());
 }
 
 void translator::build_automaton(void){
@@ -70,14 +73,41 @@ void translator::next_state(void){
     result += section_title("Next state");
     result += affected(pg.get_straightness()+1);
     result += next_control(pg.get_straightness()+1);
+    result += next_turn(pg.get_straightness()+1,variables_succ);
+}
+
+void translator::variables_logic(void){
+    result += section_title("Variables logic");
+    result += capture_count(pairwise_board_succ,variables_succ,pg.get_board().get_height(),pg.get_board().get_width());
+    result += succ(variables_succ,200); // TODO: clearly just a placeholder
+    result += arithmetics(variables_succ,variables_arithmetics);
+    result += comaprisons(variables_arithmetics);
+    result += "(<= "+variable_value("turn","?val")+"\n    (true ("+turn_name+" ?val)))\n";
+    result += "(<= "+variable_value("?piece","?val")+"\n    "+piece_type("?piece")+"\n    ("+capture_count_name+" ?piece ?val))\n";
+    result += "(<= "+variable_value("?variable","?val")+"\n    "+variable_type("?variable")+"\n    (true ("+variable_count+" ?piece ?val)))\n";
+    result += '\n';
+}
+
+void translator::identifiers_recognition(void){
+    result += section_title("Pieces");
+    for(const auto& el: pg.get_declarations().get_legal_pieces())
+        result += piece_type(el.to_string()) + '\n';
+    result += '\n';
+    result += section_title("Variables");
+    for(const auto& el: pg.get_declarations().get_legal_variables())
+        result += variable_type(el.to_string()) + '\n';
+    result += "(<= ("+variable_type("?player")+")\n    (role ?player))\n";
+    result += '\n';
 }
 
 std::string translator::to_gdl(void){
     build_automaton();
     result += section_title(pg.get_name());
     roles_to_gdl();
+    identifiers_recognition();
     init_to_gdl();
     arithmetics_to_gdl();
+    variables_logic();
     automaton_to_gdl();
     modifiers_to_gdl();
     legal_to_gdl();

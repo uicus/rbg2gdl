@@ -8,6 +8,7 @@
 const std::string separator = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
 const std::string digit = "(digit 0)\n(digit 1)\n";
 const std::string board_succ = "boardSucc";
+const std::string pairwise_board_succ = "cellSucc";
 const std::string board_arithmetics = "board";
 const std::string repetitions_succ = "repSucc";
 const std::string variables_succ = "variablesSucc";
@@ -36,10 +37,17 @@ const std::string finisher = "finisher";
 const std::string move_name = "move";
 const std::string affected_cell_name = "affectedCell";
 const std::string affected_var_name = "affectedVar";
+const std::string turn_name = "turnCount";
+const std::string variable_count = "variableCount";
+const std::string capture_count_helper_name = "captureCountHelper";
+const std::string capture_count_name = "captureCount";
 
 std::string section_title(const std::string& name);
+std::string piece_type(const std::string& var);
+std::string variable_type(const std::string& var);
 uint length_of(uint v);
 std::string succ(const std::string& name, uint max_number, bool logarithmic=false);
+std::string pairwise_succ(const std::string& name, uint max_x,uint max_y);
 std::string sum(const std::string& succ_name, const std::string& sum_name);
 std::string sub(const std::string& sum_name, const std::string& sub_name);
 std::string eq(const std::string& sum_name, const std::string& eq_name);
@@ -64,5 +72,7 @@ std::string move_predicate(uint k_straightness);
 std::string legal(uint k_straightness);
 std::string affected(uint k_straightness);
 std::string next_control(uint k_straightness);
+std::string next_turn(uint k_straightness,const std::string& turn_succ_name);
+std::string capture_count(const std::string& pair_succ_name, const std::string& succ_name, uint max_x, uint max_y);
 
 #endif
