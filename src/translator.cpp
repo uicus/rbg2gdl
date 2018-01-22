@@ -23,6 +23,12 @@ void translator::board_to_gdl(void){
         for(uint j=0;j<pg.get_board().get_width();++j)
             result += "(init "+cell(j,i,pg.get_board().get_square(j,i).to_string())+")\n";
     result += '\n';
+    for(uint i=0;i<pg.get_board().get_height();++i)
+        result += "(rank "+std::to_string(i)+")\n";
+    result += '\n';
+    for(uint i=0;i<pg.get_board().get_width();++i)
+        result += "(file "+std::to_string(i)+")\n";
+    result += '\n';
 }
 
 void translator::init_to_gdl(void){
@@ -74,6 +80,10 @@ void translator::next_state(void){
     result += affected(pg.get_straightness()+1);
     result += next_control(pg.get_straightness()+1);
     result += next_turn(pg.get_straightness()+1,variables_succ);
+    result += next_state_number(pg.get_straightness()+1);
+    result += next_non_affected_cells + next_non_affected_vars + '\n';
+    result += next_cell(pg.get_straightness()+1);
+    result += next_variable(pg.get_straightness()+1);
 }
 
 void translator::variables_logic(void){
@@ -96,8 +106,16 @@ void translator::identifiers_recognition(void){
     result += section_title("Variables");
     for(const auto& el: pg.get_declarations().get_legal_variables())
         result += variable_type(el.to_string()) + '\n';
-    result += "(<= ("+variable_type("?player")+")\n    (role ?player))\n";
+    result += "(<= "+variable_type("?player")+"\n    (role ?player))\n";
     result += '\n';
+}
+
+void translator::end_game_logic(void){
+    result += section_title("End game");
+    result += terminal_because_no_legal;
+    result += terminal_because_accept_state;
+    result += goal_if_end_game;
+    result += goal_if_ongoing;
 }
 
 std::string translator::to_gdl(void){
@@ -112,5 +130,6 @@ std::string translator::to_gdl(void){
     modifiers_to_gdl();
     legal_to_gdl();
     next_state();
+    end_game_logic();
     return result;
 }

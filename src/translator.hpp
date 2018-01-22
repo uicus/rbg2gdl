@@ -22,6 +22,7 @@ class translator{
         void next_state(void);
         void variables_logic(void);
         void identifiers_recognition(void);
+        void end_game_logic(void);
     public:
         translator(rbg_parser::parsed_game&& pg);
         std::string to_gdl(void);

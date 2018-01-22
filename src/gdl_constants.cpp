@@ -286,21 +286,62 @@ std::string capture_count(const std::string& pair_succ_name, const std::string& 
     result += "(<= ("+capture_count_name+" ?piece ?val)\n    ";
     result += "("+capture_count_helper_name+" ?piece ?val "+std::to_string(max_x-1)+" "+std::to_string(max_y-1)+"))\n";
     result += "(<= ("+capture_count_helper_name+" ?piece 0 0 0)\n    ";
-    result += cell(0,0,"?anotherPiece")+"\n    ";
+    result += "(true "+cell(0,0,"?anotherPiece")+")\n    ";
+    result += piece_type("?piece")+"\n    ";
     result += "(distinct ?piece ?anotherPiece))\n";
     result += "(<= ("+capture_count_helper_name+" ?piece 1 0 0)\n    ";
-    result += cell(0,0,"?piece")+")\n";
+    result += "(true "+cell(0,0,"?piece")+"))\n";
     result += "(<= ("+capture_count_helper_name+" ?piece ?n ?x ?y)\n    ";
-    result += cell(0,0,"?anotherPiece")+"\n    ";
+    result += "(true "+cell("?x","?y","?anotherPiece")+")\n    ";
     result += "(distinct ?piece ?anotherPiece)\n    ";
     result += "("+pair_succ_name+" ?prevx ?prevy ?x ?y)\n    ";
     result += "("+capture_count_helper_name+" ?piece ?n ?prevx ?prevy))\n";
     result += "(<= ("+capture_count_helper_name+" ?piece ?n ?x ?y)\n    ";
-    result += cell(0,0,"?piece")+"\n    ";
-    result += "(distinct ?piece ?anotherPiece)\n    ";
+    result += "(true "+cell("?x","?y","?piece")+")\n    ";
     result += "("+pair_succ_name+" ?prevx ?prevy ?x ?y)\n    ";
     result += "("+succ_name+" ?prevn ?n)\n    ";
     result += "("+capture_count_helper_name+" ?piece ?prevn ?prevx ?prevy))\n";
+    result += '\n';
+    return result;
+}
+
+std::string next_state_number(uint k_straightness){
+    std::string result;
+    result += "(<= (next ("+current_state+" ?q"+std::to_string(k_straightness)+"))\n    ";
+    result += "(does ?movingPlayer "+move_predicate(k_straightness)+"))\n";
+    result += '\n';
+    return result;
+}
+
+std::string next_cell(uint k_straightness){
+    std::string result;
+    for(uint i=1;i<=k_straightness;++i){
+        auto number = std::to_string(i);
+        result += "(<= (next "+cell("?x"+number,"?y"+number,"?piece")+")\n    ";
+        result += "(does "+move_predicate(k_straightness)+")\n    ";
+        result += "("+cell_change+" ?q"+number+" ?piece)";
+        for(uint j=i+1;j<=k_straightness;++j)
+            result += "\n    (not ("+cell_change+" ?q"+std::to_string(j)+" ?piece"+std::to_string(j)+"))";
+        result += ")\n";
+    }
+    result += '\n';
+    return result;
+}
+
+std::string next_variable(uint k_straightness){
+    std::string result;
+    result += "(<= (newVal ?val ?val)\n    ("+variables_succ+" ?val ?next))\n";
+    result += "(<= (newVal ?val ?numVal)\n    "+variable_value("?val","?numVal")+")\n\n";
+    for(uint i=1;i<=k_straightness;++i){
+        auto number = std::to_string(i);
+        result += "(<= (next ("+variable_count+" ?variable ?numVal))\n    ";
+        result += "(does "+move_predicate(k_straightness)+")\n    ";
+        result += "("+var_assignment+" ?q"+number+" ?variable ?val)\n    ";
+        result += "(newVal ?val ?numVal)";
+        for(uint j=i+1;j<=k_straightness;++j)
+            result += "\n    (not ("+var_assignment+" ?q"+std::to_string(j)+" ?variable ?val"+std::to_string(j)+"))";
+        result += ")\n";
+    }
     result += '\n';
     return result;
 }
