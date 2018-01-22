@@ -72,7 +72,7 @@ pure_moves_printer pure_moves_printer::clone_printer(void){
         x_name,y_name,x_name_index,y_name_index,
         legal_pieces_checkers_to_write,legal_pieces_checker_index,
         moves_to_write,move_predicate_index,
-        conditions_to_write,condition_predicate_index);
+        conditions_to_write,condition_predicate_index,standalone_hint);
 }
 
 uint pure_moves_printer::get_pure_move_helper_index(const rbg_parser::pure_game_move* pgm){
@@ -95,7 +95,7 @@ void pure_moves_printer::postpone_pure_move(const rbg_parser::pure_game_move* pg
 }
 
 void pure_moves_printer::postpone_condition(const rbg_parser::condition* c){
-    final_result += "("+moves_helper_name+"_"+std::to_string(get_condition_helper_index(c));
+    final_result += "("+conditions_helper_name+"_"+std::to_string(get_condition_helper_index(c));
     final_result += " "+position_varaible(x_name,x_name_index)+" "+position_varaible(y_name,y_name_index);
     final_result += ")";
 }
@@ -110,10 +110,14 @@ std::string pure_moves_printer::side_of_comparison(const rbg_parser::token& var,
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::shift& m){
-    displacement(x_name,x_name_index,m.get_x());
-    if(m.get_x()!=0 && m.get_y()!=0)
-        final_result += "\n    ";
-    displacement(y_name,y_name_index,m.get_y());
+    if(standalone_hint&&m.get_x()!=0&&m.get_y()!=0)
+        postpone_pure_move(&m);
+    else{
+        displacement(x_name,x_name_index,m.get_x());
+        if(m.get_x()!=0 && m.get_y()!=0)
+            final_result += "\n    ";
+        displacement(y_name,y_name_index,m.get_y());
+    }
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::ons& m){
@@ -203,13 +207,15 @@ void pure_moves_printer::dispatch(const rbg_parser::alternative& m){
 
 void pure_moves_printer::dispatch(const rbg_parser::negatable_condition& m){
     auto pmp = clone_printer();
-    m.get_content()->accept(pmp);
     if(m.is_negated()){
         pmp.standalone_hint = true;
+        m.get_content()->accept(pmp);
         final_result += "(not "+pmp.get_final_result()+")";
     }
-    else
+    else{
+        m.get_content()->accept(pmp);
         final_result += pmp.get_final_result();
+    }
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
@@ -260,16 +266,20 @@ void pure_moves_printer::dispatch(const rbg_parser::comparison& m){
 }
 
 void pure_moves_printer::dispatch(const rbg_parser::move_condition& m){
-    uint x_temp_index = 0, y_temp_index = 0;
-    if(x_name_index==0)
-        final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(x_name,x_name_index)+" ?"+x_name+"_0)\n    ";
-    if(y_name_index==0)
-        final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(y_name,y_name_index)+" ?"+y_name+"_0)\n    ";
-    pure_moves_printer pmp(
-        x_name+"_"+std::to_string(x_name_index),y_name+"_"+std::to_string(y_name_index),x_temp_index,y_temp_index,
-        legal_pieces_checkers_to_write,legal_pieces_checker_index,
-        moves_to_write,move_predicate_index,
-        conditions_to_write,condition_predicate_index);
-    m.get_content()->accept(pmp);
-    final_result += pmp.get_final_result();
+    if(standalone_hint&&(x_name_index==0 || y_name_index==0))
+        postpone_condition(&m);
+    else{
+        uint x_temp_index = 0, y_temp_index = 0;
+        if(x_name_index==0)
+            final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(x_name,x_name_index)+" ?"+x_name+"_0)\n    ";
+        if(y_name_index==0)
+            final_result += "("+eq_name(board_arithmetics)+" "+position_varaible(y_name,y_name_index)+" ?"+y_name+"_0)\n    ";
+        pure_moves_printer pmp(
+            x_name+"_"+std::to_string(x_name_index),y_name+"_"+std::to_string(y_name_index),x_temp_index,y_temp_index,
+            legal_pieces_checkers_to_write,legal_pieces_checker_index,
+            moves_to_write,move_predicate_index,
+            conditions_to_write,condition_predicate_index);
+        m.get_content()->accept(pmp);
+        final_result += pmp.get_final_result();
+    }
 }

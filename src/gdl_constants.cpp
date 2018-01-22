@@ -1,6 +1,5 @@
 #include"gdl_constants.hpp"
 
-
 std::string section_title(const std::string& name){
     return separator+";; "+name+'\n'+separator+'\n';
 }
@@ -96,13 +95,13 @@ std::string arithmetics(const std::string& succ_name, const std::string& arithme
     return result;
 }
 
-std::string comaprisons(const std::string arithmetics_name){
+std::string comaprisons(const std::string arithmetics_name, const std::string& succ_name){
     std::string result;
-    result += "(<= ("+neq_name(arithmetics_name)+" ?x ?y)\n    (not ("+eq_name(arithmetics_name)+" ?x ?y)))\n";
+    result += "(<= ("+neq_name(arithmetics_name)+" ?x ?y)\n    (not ("+eq_name(arithmetics_name)+" ?x ?y))\n    ("+succ_name+" ?x ?nextx)\n    ("+succ_name+" ?y ?nexty))\n";
     result += "(<= ("+ge_name(arithmetics_name)+" ?x ?y)\n    ("+sum_name(arithmetics_name)+" ?z ?y ?x))\n";
-    result += "(<= ("+greater_name(arithmetics_name)+" ?x ?y)\n    ("+ge_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
+    result += "(<= ("+greater_name(arithmetics_name)+" ?x ?y)\n    ("+ge_name(arithmetics_name)+" ?x ?y)\n    ("+neq_name(arithmetics_name)+" ?x ?y))\n";
     result += "(<= ("+le_name(arithmetics_name)+" ?x ?y)\n    ("+sum_name(arithmetics_name)+" ?z ?x ?y))\n";
-    result += "(<= ("+less_name(arithmetics_name)+" ?x ?y)\n    ("+le_name(arithmetics_name)+" ?x ?y) ("+neq_name(arithmetics_name)+" ?x ?y))\n";
+    result += "(<= ("+less_name(arithmetics_name)+" ?x ?y)\n    ("+le_name(arithmetics_name)+" ?x ?y)\n    ("+neq_name(arithmetics_name)+" ?x ?y))\n";
     result += '\n';
     return result;
 }
@@ -188,7 +187,7 @@ std::string cell(const std::string& x_name,const std::string& y_name,const std::
 }
 
 std::string variable_value(const std::string& variable_name,const std::string& value){
-    return "("+variables_predicate+" "+variable_name+" "+value+")";
+    return "(var "+variable_name+" "+value+")"; // TODO: "("+variable_predicate+" "+variable_name+" "+value+")"; <-- check this strange segfault
 }
 
 std::string position_varaible(const std::string& position_name,uint index){
@@ -248,14 +247,14 @@ std::string next_control(uint k_straightness){
     std::string result;
     result += "(<= (next "+control("?player")+")\n    ";
     result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
-    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" ?player)\n    ";
-    result += "(role ?player))\n";
+    result += "("+next_player+" ?q"+std::to_string(k_straightness)+" ?player))\n";
     result += "(<= (next "+control("?player")+")\n    ";
     result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
     result += "("+next_player+" ?q"+std::to_string(k_straightness)+" "+continue_move+")\n    ";
     result += "(true "+control("?player")+"))\n";
     result += "(<= (next "+control("?player")+")\n    ";
     result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
+    result += "(role ?nextPlayer)\n    ";
     result += "(not ("+next_player+" ?q"+std::to_string(k_straightness)+" ?nextPlayer))\n    ";
     result += "(true "+control("?player")+"))\n";
     result += '\n';
@@ -276,6 +275,7 @@ std::string next_turn(uint k_straightness, const std::string& turn_succ_name){
     result += "(<= (next ("+turn_name+" ?n))\n    ";
     result += "(does ?movingPlayer "+move_predicate(k_straightness)+")\n    ";
     result += "(not ("+next_player+" ?q"+std::to_string(k_straightness)+" ?nextPlayer))\n    ";
+    result += "(role ?nextPlayer)\n    ";
     result += "(true ("+turn_name+" ?n)))\n";
     result += '\n';
     return result;
@@ -318,10 +318,12 @@ std::string next_cell(uint k_straightness){
     for(uint i=1;i<=k_straightness;++i){
         auto number = std::to_string(i);
         result += "(<= (next "+cell("?x"+number,"?y"+number,"?piece")+")\n    ";
-        result += "(does "+move_predicate(k_straightness)+")\n    ";
+        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
         result += "("+cell_change+" ?q"+number+" ?piece)";
-        for(uint j=i+1;j<=k_straightness;++j)
+        for(uint j=i+1;j<=k_straightness;++j){
             result += "\n    (not ("+cell_change+" ?q"+std::to_string(j)+" ?piece"+std::to_string(j)+"))";
+            result += "\n    "+piece_type("?piece"+std::to_string(j));
+        }
         result += ")\n";
     }
     result += '\n';
@@ -335,13 +337,28 @@ std::string next_variable(uint k_straightness){
     for(uint i=1;i<=k_straightness;++i){
         auto number = std::to_string(i);
         result += "(<= (next ("+variable_count+" ?variable ?numVal))\n    ";
-        result += "(does "+move_predicate(k_straightness)+")\n    ";
+        result += "(does ?player "+move_predicate(k_straightness)+")\n    ";
         result += "("+var_assignment+" ?q"+number+" ?variable ?val)\n    ";
         result += "(newVal ?val ?numVal)";
-        for(uint j=i+1;j<=k_straightness;++j)
+        for(uint j=i+1;j<=k_straightness;++j){
             result += "\n    (not ("+var_assignment+" ?q"+std::to_string(j)+" ?variable ?val"+std::to_string(j)+"))";
+            result += "\n    (newVal ?val"+std::to_string(j)+" ?anotherVal)";
+        }
         result += ")\n";
     }
     result += '\n';
+    return result;
+}
+
+std::string terminal_because_no_legal(uint k_straightness){
+    std::string result;
+    result +="(<= terminal\n    (true "+control("?player")+")\n    (not (legal ?player "+move_predicate(k_straightness)+"))";
+    for(uint i=0;i<k_straightness;++i){
+        std::string number = std::to_string(i+1);
+        result += "\n     (epsilon ?q"+number+" ?q"+number+")";
+        result += "\n     (file ?x"+number+")";
+        result += "\n     (rank ?y"+number+")";
+    }
+    result += ")\n";
     return result;
 }

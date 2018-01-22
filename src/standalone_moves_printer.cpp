@@ -7,6 +7,7 @@
 #include"concatenation.hpp"
 #include"conjunction.hpp"
 #include"comparison.hpp"
+#include"move_condition.hpp"
 
 standalone_moves_printer::standalone_moves_printer(
     uint current_index,
@@ -124,6 +125,10 @@ void standalone_moves_printer::dispatch(const rbg_parser::conjunction& m){
 }
 
 void standalone_moves_printer::dispatch(const rbg_parser::comparison& m){
+    use_standard_writer(&m);
+}
+
+void standalone_moves_printer::dispatch(const rbg_parser::move_condition& m){
     use_standard_writer(&m);
 }
 

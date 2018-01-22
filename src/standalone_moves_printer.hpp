@@ -56,7 +56,7 @@ class standalone_moves_printer : public rbg_parser::abstract_dispatcher{
         void dispatch(const rbg_parser::alternative& m)override;
         void dispatch(const rbg_parser::negatable_condition&)override{assert(false);};
         void dispatch(const rbg_parser::comparison& m)override;
-        void dispatch(const rbg_parser::move_condition&)override{assert(false);};
+        void dispatch(const rbg_parser::move_condition& m)override;
         std::string get_final_result(void);
 };
 

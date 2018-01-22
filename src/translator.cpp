@@ -91,7 +91,7 @@ void translator::variables_logic(void){
     result += capture_count(pairwise_board_succ,variables_succ,pg.get_board().get_height(),pg.get_board().get_width());
     result += succ(variables_succ,200); // TODO: clearly just a placeholder
     result += arithmetics(variables_succ,variables_arithmetics);
-    result += comaprisons(variables_arithmetics);
+    result += comaprisons(variables_arithmetics,variables_succ);
     result += "(<= "+variable_value("turn","?val")+"\n    (true ("+turn_name+" ?val)))\n";
     result += "(<= "+variable_value("?piece","?val")+"\n    "+piece_type("?piece")+"\n    ("+capture_count_name+" ?piece ?val))\n";
     result += "(<= "+variable_value("?variable","?val")+"\n    "+variable_type("?variable")+"\n    (true ("+variable_count+" ?piece ?val)))\n";
@@ -112,7 +112,7 @@ void translator::identifiers_recognition(void){
 
 void translator::end_game_logic(void){
     result += section_title("End game");
-    result += terminal_because_no_legal;
+    result += terminal_because_no_legal(pg.get_straightness()+1);
     result += terminal_because_accept_state;
     result += goal_if_end_game;
     result += goal_if_ongoing;
